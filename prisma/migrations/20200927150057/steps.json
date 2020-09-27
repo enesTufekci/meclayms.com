@@ -1,0 +1,132 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateField",
+      "model": "User",
+      "field": "suspendedUntil",
+      "type": "DateTime",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Entry",
+      "field": "credits",
+      "type": "EntryCredit",
+      "arity": "List"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Entry",
+      "field": "discredits",
+      "type": "EntryDiscredit",
+      "arity": "List"
+    },
+    {
+      "tag": "CreateField",
+      "model": "EntryCredit",
+      "field": "Entry",
+      "type": "Entry",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "EntryCredit",
+          "field": "Entry"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "EntryCredit",
+          "field": "Entry"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[entryId]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "EntryCredit",
+          "field": "Entry"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[id]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "EntryCredit",
+      "field": "entryId",
+      "type": "String",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateField",
+      "model": "EntryDiscredit",
+      "field": "Entry",
+      "type": "Entry",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "EntryDiscredit",
+          "field": "Entry"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "EntryDiscredit",
+          "field": "Entry"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[entryId]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "EntryDiscredit",
+          "field": "Entry"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[id]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "EntryDiscredit",
+      "field": "entryId",
+      "type": "String",
+      "arity": "Optional"
+    }
+  ]
+}
