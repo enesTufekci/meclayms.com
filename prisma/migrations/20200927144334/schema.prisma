@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url = "***"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  USER
+  MAINTAINER
+  ADMIN
+  OWNER
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  TERMINATED
+}
+
+model User {
+  id                     String           @id @default(uuid())
+  email                  String           @unique
+  username               String           @unique
+  password               String
+  role                   UserRole         @default(USER)
+  status                 UserStatus       @default(ACTIVE)
+  confirmed              Boolean          @default(false)
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @default(now())
+  refreshTokenIssueCount Int              @default(0)
+  Entry                  Entry[]
+  Topic                  Topic[]
+  EntryCredit            EntryCredit[]
+  EntryDiscredit         EntryDiscredit[]
+  OwnedInvitations       Invitation[]     @relation("owner")
+  UsedInvitation         Invitation       @relation("consumer")
+  Feedback               Feedback[]
+}
+
+model Invitation {
+  id         String   @id @default(uuid())
+  code       String
+  owner      User?    @relation(name: "owner", fields: [ownerId], references: [id])
+  ownerId    String?
+  consumer   User?    @relation(name: "consumer", fields: [consumerId], references: [id])
+  consumerId String?
+  createdAt  DateTime @default(now())
+}
+
+model Topic {
+  id           String    @id @default(uuid())
+  slug         String
+  body         String
+  entries      Entry[]
+  createdBy    User      @relation(fields: [userId], references: [id])
+  deleteReason String?
+  userId       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now())
+  deletedAt    DateTime?
+}
+
+model Entry {
+  id           String          @id @default(uuid())
+  body         String
+  createdBy    User            @relation(fields: [userId], references: [id])
+  Topic        Topic?          @relation(fields: [topicId], references: [id])
+  topicId      String?
+  userId       String
+  revisions    EntryRevision[]
+  deleteReason String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @default(now())
+  deletedAt    DateTime?
+  Feedback     Feedback[]
+}
+
+model EntryRevision {
+  id        String    @id @default(uuid())
+  body      String
+  Entry     Entry?    @relation(fields: [entryId], references: [id])
+  entryId   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+model EntryCredit {
+  id      String @id @default(uuid())
+  givenBy User   @relation(fields: [userId], references: [id])
+  userId  String
+}
+
+model EntryDiscredit {
+  id      String @id @default(uuid())
+  givenBy User   @relation(fields: [userId], references: [id])
+  userId  String
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  body      String
+  entry     Entry    @relation(fields: [entryId], references: [id])
+  givenBy   User     @relation(fields: [userId], references: [id])
+  entryId   String
+  userId    String
+  credited  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  deletedAt DateTime @default(now())
+}
