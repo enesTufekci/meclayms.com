@@ -46,7 +46,7 @@ model User {
 
 model Invitation {
   id         String   @id @default(uuid())
-  code       String
+  code       String   @unique
   owner      User?    @relation(name: "owner", fields: [ownerId], references: [id])
   ownerId    String?
   consumer   User?    @relation(name: "consumer", fields: [consumerId], references: [id])
