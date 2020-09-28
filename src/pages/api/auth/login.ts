@@ -1,5 +1,5 @@
 import { verify } from "argon2";
-import { RouteHandler, createRoute } from "lib/api/createRoute";
+import { RouteHandler, createRoute, RouteHandlerResponse } from "lib/api/createRoute";
 import { issueRefreshToken, signToken } from "helpers/auth/jwt";
 
 export interface LoginHandlerArgs {
@@ -9,13 +9,13 @@ export interface LoginHandlerArgs {
 
 export interface LoginHandlerData {
   accessToken: string;
+  message: string;
 }
 
-let loginHandler: RouteHandler<LoginHandlerArgs, LoginHandlerData> = async ({
-  req,
-  prismaClient,
-  res,
-}) => {
+let loginHandler: RouteHandler<LoginHandlerArgs, LoginHandlerData> = async (
+  { req, prismaClient, res },
+  reply
+) => {
   let { email, password } = req.body;
 
   try {
@@ -29,30 +29,18 @@ let loginHandler: RouteHandler<LoginHandlerArgs, LoginHandlerData> = async ({
       issueRefreshToken(res, {
         count: user?.refreshTokenIssueCount!,
       });
-      return {
-        status: "not ok",
-        data: {
-          accessToken: signToken({
-            kind: "AccessToken",
-            expiresIn: "2m",
-            userId: user?.id!,
-          }),
-        },
-      };
+      let accessToken = signToken({
+        kind: "AccessToken",
+        expiresIn: "2m",
+        userId: user?.id!,
+      });
+      return reply.ok({
+        accessToken,
+      });
     }
-    return {
-      status: "not ok",
-      error: {
-        messages: ["Invalid credentials!"],
-      },
-    };
+    return reply.notOk("Invalid credentials!");
   } catch (error) {
-    return {
-      status: "not ok",
-      error: {
-        messages: ["Invalid credentials!"],
-      },
-    };
+    return reply.notOk("Invalid credentials!");
   }
 };
 

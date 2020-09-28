@@ -7,32 +7,20 @@ interface MeHandlerData {
   user: User;
 }
 
-let meHandler: AuthorizedRouteHandler<MeHandlerArgs, MeHandlerData> = async ({
-  prismaClient,
-  userId,
-}) => {
+let meHandler: AuthorizedRouteHandler<MeHandlerArgs, MeHandlerData> = async (
+  { prismaClient, userId },
+  reply
+) => {
   try {
-    let user = prismaClient.user.findOne({
+    let user = await prismaClient.user.findOne({
       where: {
         id: userId,
       },
     });
-    if (user) {
-      return {
-        status: "ok",
-        user,
-      };
-    }
-    return {
-      status: "not ok",
-    };
+
+    return user ? reply.ok({ user }) : reply.notAuthorized();
   } catch (error) {
-    return {
-      status: "not ok",
-      error: {
-        messages: [String(error)],
-      },
-    };
+    return reply.notOk(String(error));
   }
 };
 

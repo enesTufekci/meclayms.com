@@ -10,10 +10,10 @@ export interface RegisterHandlerArgs {
 
 export interface RegisterHandlerData {}
 
-let registerHandler: RouteHandler<
-  RegisterHandlerArgs,
-  RegisterHandlerData
-> = async ({ req, prismaClient }) => {
+let registerHandler: RouteHandler<RegisterHandlerArgs, RegisterHandlerData> = async (
+  { req, prismaClient },
+  reply
+) => {
   let { email, password, username, invitationCode } = req.body;
 
   try {
@@ -23,12 +23,7 @@ let registerHandler: RouteHandler<
       },
     });
     if (invitation?.consumerId) {
-      return {
-        status: "not ok",
-        error: {
-          messages: ["Invitaion code is invalid."],
-        },
-      };
+      return reply.notOk("Invitaion code is invalid.");
     }
     await prismaClient.user.create({
       data: {
@@ -38,17 +33,9 @@ let registerHandler: RouteHandler<
       },
     });
 
-    return {
-      status: "ok",
-    };
+    return reply.ok({});
   } catch (error) {
-    return {
-      status: "not ok",
-      statusCode: 400,
-      error: {
-        messages: [String(error)],
-      },
-    };
+    return reply.notOk(String(error));
   }
 };
 

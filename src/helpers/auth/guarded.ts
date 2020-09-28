@@ -1,5 +1,5 @@
 import { decodeToken, signToken } from "./jwt";
-import { AuthorizedRouteHandler, RouteHandler } from "lib/api/createRoute";
+import { AuthorizedRouteHandler, RouteHandler, reply } from "lib/api/createRoute";
 
 export function guarded<Args, Data>(
   handler: AuthorizedRouteHandler<Args, Data>
@@ -21,32 +21,24 @@ export function guarded<Args, Data>(
       }
 
       if (userId) {
-        let data = await handler({ ...ctx, userId });
-        return issueNewAccessToken
-          ? {
-              ...data,
-              accessToken: signToken({
-                kind: "AccessToken",
-                userId,
-                expiresIn: "2m",
-              }),
-            }
-          : data;
+        let data = await handler({ ...ctx, userId }, reply);
+        if (!issueNewAccessToken) {
+          return data;
+        } else {
+          return reply.withAccessToken(
+            data,
+            signToken({
+              kind: "AccessToken",
+              userId,
+              expiresIn: "2m",
+            })
+          );
+        }
       } else {
-        return {
-          status: "not ok",
-          error: {
-            messages: ["Not authorized!"],
-          },
-        };
+        return reply.notAuthorized();
       }
     } catch (error) {
-      return {
-        status: "not ok",
-        error: {
-          messages: ["Not authorized!"],
-        },
-      };
+      return reply.notAuthorized();
     }
   };
 }
